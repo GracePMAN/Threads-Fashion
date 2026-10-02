@@ -1,0 +1,9 @@
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "24"
+
+# Netlify handles the Supabase session refresh through Next.js 16's proxy
+# (middleware) layer, so no legacy _redirects rules are needed.
