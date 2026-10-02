@@ -17,6 +17,17 @@ const nextConfig: NextConfig = {
         ]
       : [],
   },
+
+  experimental: {
+    /**
+     * Disable Turbopack's filesystem cache for production builds.
+     *
+     * The cache (`.next/cache/turbopack`) embeds resolved build-time values,
+     * which Netlify's secret scanner then flags as leaked credentials. Turning
+     * it off keeps generated build output free of inlined secrets.
+     */
+    turbopackFileSystemCacheForBuild: false,
+  },
 };
 
 export default nextConfig;

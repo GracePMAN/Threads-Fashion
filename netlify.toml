@@ -5,5 +5,15 @@
 [build.environment]
   NODE_VERSION = "24"
 
+  # Next.js / Turbopack write a filesystem build cache under .next. Those files
+  # embed values resolved from the build environment, which Netlify's secret
+  # scanner reads as leaked credentials. Only the generated build-cache
+  # directories are omitted; the publish directory and everything else is still
+  # scanned. Belt-and-braces alongside turbopackFileSystemCacheForBuild = false
+  # in next.config.ts.
+  SECRETS_SCAN_OMIT_PATHS = """
+    .next/cache/turbopack/**
+  """
+
 # Netlify handles the Supabase session refresh through Next.js 16's proxy
 # (middleware) layer, so no legacy _redirects rules are needed.
