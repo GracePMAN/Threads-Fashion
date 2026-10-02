@@ -75,12 +75,46 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 
 # Mailgun — SERVER ONLY, never prefix with NEXT_PUBLIC_
+MAILGUN_SENDING_KEY=
 MAILGUN_API_KEY=
 MAILGUN_DOMAIN=
 MAILGUN_BASE_URL=https://api.mailgun.net
 ```
 
+`MAILGUN_SENDING_KEY` is the credential used to send order confirmations.
+`MAILGUN_API_KEY` is kept in the environment and used as a fallback for
+sending, and is still available for any other Mailgun API operations.
+
 `.env.local` is already in `.gitignore` and must never be committed.
+
+### Order confirmation email
+
+`lib/mailgun.ts` sends the HTML confirmation from the checkout Server Action
+only. It returns a result object rather than throwing, so a failed email never
+discards an order that is already saved: the action logs the failure, still
+returns success, and the checkout screen tells the customer the order is saved.
+
+Mailgun errors are classified in the server log, so the cause is diagnosable
+without exposing anything to the browser:
+
+| Log code | Meaning |
+| --- | --- |
+| `bad_credentials` | The sending key or `MAILGUN_DOMAIN` is wrong |
+| `domain_not_authorized` | Mailgun free account sending to a non-authorized recipient |
+| `bad_request` | The from/to address or message body was rejected |
+| `rate_limited` | The Mailgun account is rate limited |
+
+Authentication uses `MAILGUN_SENDING_KEY`, falling back to `MAILGUN_API_KEY`
+when the sending key is absent. Both are read without a `NEXT_PUBLIC_` prefix
+and only inside this server module, so neither reaches the browser bundle.
+
+> **Important — Mailgun free accounts.** A free Mailgun account uses a
+> *sandbox* domain and can only send to addresses you have added under
+> **Sending → Domain settings → authorized recipients**. Until a recipient is
+> on that list, Mailgun answers with HTTP 403
+> (`Domain ... is not allowed to send: Free accounts are for test purposes
+> only`) even though your API key is perfectly valid. Add each customer address
+> you want to email, or upgrade the account, before testing checkout.
 
 ---
 
@@ -108,6 +142,20 @@ Components, Server Actions and Client Components all agree on who is signed in.
 `proxy.ts` refreshes the session on each request. Because the session lives in
 the database rather than localStorage, orders survive logout, closing the
 browser and signing in again.
+
+Sign-in uses Google OAuth entirely through Supabase Auth. No Google client id
+or client secret appears in this project — only the Supabase publishable key —
+so there is no OAuth secret to leak. The flow is PKCE (`code_challenge_method=s256`):
+
+```
+/login  --signInWithGoogle-->  Supabase /authorize  --302-->  accounts.google.com
+                                                                    |
+/auth/callback  <--code + PKCE verifier exchange---------------  (consent)
+```
+
+`app/auth/callback/route.ts` exchanges the `code` for a session, which is what
+sets the auth cookies. The `next` parameter is validated to be a same-origin
+path before use, so the callback cannot be turned into an open redirect.
 
 ### Order security
 
@@ -197,6 +245,9 @@ proxy.ts                    Session refresh + protected route guard
 3. In **Supabase → Authentication → URL Configuration**, add your Netlify URL to
    the **Site URL** and **Redirect URLs**, including
    `https://<your-site>.netlify.app/auth/callback`.
+   (Verified: this project's `/authorize` endpoint currently accepts any
+   redirect target, so sign-in will work before this step — but configuring it
+   explicitly is still correct and protects you if the setting later tightens.)
 4. In **Google Cloud Console**, add the same callback origin to your OAuth
    client's authorised redirect URIs.
 5. Deploy, then re-test sign-in, checkout and email on the live domain.

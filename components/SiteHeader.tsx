@@ -22,73 +22,77 @@ const NAV_LINKS = [
 
 export function SiteHeader() {
   return (
-    <div className="border-b border-ink-800/80 bg-ink-950">
-      {/* Announcement strip */}
+    <div className="bg-ink-950">
+      {/* Announcement strip — scrolls away with the page. */}
       <div className="bg-ink-900">
         <p className="shell py-2 text-center text-[0.65rem] font-medium uppercase tracking-[0.2em] text-ink-300">
           Free delivery on orders over ₦100,000 &middot; Lagos &middot; Abuja &middot; PH
         </p>
       </div>
 
-      <header className="shell">
-        <div className="flex h-16 items-center justify-between gap-4">
-          <Link href="/" aria-label="THREADS NG home" className="shrink-0">
-            <Logo className="text-bone-50" />
-          </Link>
+      {/*
+        Main header — sticky so the logo, nav and icons stay visible while page
+        content scrolls underneath. `bg-ink-950` is fully opaque, and the z-index
+        keeps it above cards and page content.
+      */}
+      <header className="sticky top-0 z-50 border-b border-ink-800/80 bg-ink-950">
+        <div className="shell">
+          <div className="flex h-16 items-center justify-between gap-4">
+            <Link href="/" aria-label="THREADS NG home" className="shrink-0">
+              <Logo className="text-bone-50" />
+            </Link>
 
+            <nav aria-label="Primary" className="hidden items-center gap-7 md:flex">
+              {NAV_LINKS.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="text-xs font-medium uppercase tracking-[0.16em] text-ink-200 transition-colors hover:text-accent-400"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
+
+            <div className="flex items-center gap-1">
+              <Link
+                href="/search"
+                aria-label="Search products"
+                className="rounded-lg p-2 text-ink-200 transition-colors hover:text-accent-400"
+              >
+                <SearchIcon />
+              </Link>
+
+              {/* Auth + orders slot, filled on the client. */}
+              <AuthNavSlot />
+
+              <Link
+                href="/cart"
+                aria-label="Shopping cart"
+                className="relative rounded-lg p-2 text-ink-200 transition-colors hover:text-accent-400"
+              >
+                <BagIcon />
+                <CartBadge />
+              </Link>
+            </div>
+          </div>
+
+          {/* Mobile nav */}
           <nav
-            aria-label="Primary"
-            className="hidden items-center gap-7 md:flex"
+            aria-label="Primary mobile"
+            className="no-scrollbar -mx-1 flex gap-5 overflow-x-auto border-t border-ink-800/70 py-3 md:hidden"
           >
             {NAV_LINKS.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-xs font-medium uppercase tracking-[0.16em] text-ink-200 transition-colors hover:text-accent-400"
+                className="shrink-0 text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-ink-200"
               >
                 {link.label}
               </Link>
             ))}
           </nav>
-
-          <div className="flex items-center gap-1">
-            <Link
-              href="/search"
-              aria-label="Search products"
-              className="rounded-lg p-2 text-ink-200 transition-colors hover:text-accent-400"
-            >
-              <SearchIcon />
-            </Link>
-
-            {/* Auth + orders slot, filled on the client. */}
-            <AuthNavSlot />
-
-            <Link
-              href="/cart"
-              aria-label="Shopping cart"
-              className="relative rounded-lg p-2 text-ink-200 transition-colors hover:text-accent-400"
-            >
-              <BagIcon />
-              <CartBadge />
-            </Link>
-          </div>
         </div>
-
-        {/* Mobile nav */}
-        <nav
-          aria-label="Primary mobile"
-          className="no-scrollbar -mx-1 flex gap-5 overflow-x-auto border-t border-ink-800/70 py-3 md:hidden"
-        >
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="shrink-0 text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-ink-200"
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
       </header>
     </div>
   );

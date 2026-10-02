@@ -1,4 +1,4 @@
-"use server";
+﻿"use server";
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
@@ -39,6 +39,40 @@ interface VerifiedLine {
   price: number;
   size: string;
   quantity: number;
+}
+
+/**
+ * Maps a Postgres/PostgREST failure onto a message that is safe to show a
+ * customer while still naming the real cause.
+ *
+ * The detailed error (code, message, details, hint) is always written to the
+ * server log first; this only decides what the shopper is told.
+ */
+function describeOrderError(error: { code?: string; message?: string }): string {
+  switch (error.code) {
+    case "42501":
+      // Row Level Security refused the write. This is a permissions problem on
+      // the database side, not something the customer can fix.
+      return "Your account is not permitted to place orders. Please contact support.";
+
+    case "23502":
+      return "We could not save your order because a required field was missing. Please contact support.";
+
+    case "23503":
+      return "We could not save your order because one of the items is no longer in our catalogue. Please contact support.";
+
+    case "23505":
+      return "We could not save your order because it duplicated an existing one. Please contact support.";
+
+    case "22P02":
+      return "We could not save your order because of an invalid value. Please contact support.";
+
+    case "PGRST116":
+      return "We could not save your order. Please contact support.";
+
+    default:
+      return "We could not save your order. Please try again.";
+  }
 }
 
 function validateCustomer(input: {
@@ -170,21 +204,48 @@ export async function placeOrder(
   const total = resolved.reduce((sum, i) => sum + i.price * i.quantity, 0);
 
   // 7. Create the order, associated with the authenticated user.
-  const { data: order, error: orderError } = await supabase
-    .from("orders")
-    .insert({
-      user_id: user.id,
-      total,
-      status: "confirmed",
-    })
-    .select("id,created_at,total")
-    .single();
+  //
+  // `created_at` is supplied explicitly. Most schemas default it, but supplying
+  // it makes the order timestamp deterministic (it is what the confirmation
+  // email reports) and keeps the insert working if the column has no default.
+  const insertedAt = new Date().toISOString();
+  const { error: orderError } = await supabase.from("orders").insert({
+    user_id: user.id,
+    total,
+    status: "pending",
+    created_at: insertedAt,
+  });
 
-  if (orderError || !order) {
-    console.error("[threads-ng] order insert failed:", orderError?.message);
+  if (orderError) {
+    console.error(
+      `[threads-ng] order insert failed: code=${orderError.code} message=${orderError.message} details=${orderError.details ?? "-"} hint=${orderError.hint ?? "-"}`,
+    );
+    return { status: "error", message: describeOrderError(orderError) };
+  }
+
+  // Read the order back in its own query.
+  //
+  // This is deliberately separate from the insert above. A chained
+  // `.insert().select().single()` conflates "the insert failed" with "the row
+  // came back filtered", which reported a successful insert as
+  // "We could not save your order" and could leave an orphaned order behind.
+  const { data: order, error: orderReadError } = await supabase
+    .from("orders")
+    .select("id,created_at,total")
+    .eq("user_id", user.id)
+    .eq("created_at", insertedAt)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (orderReadError || !order) {
+    console.error(
+      `[threads-ng] order read-back failed: code=${orderReadError?.code ?? "no row"} message=${orderReadError?.message ?? "-"} details=${orderReadError?.details ?? "-"} user=${user.id} insertedAt=${insertedAt}`,
+    );
     return {
       status: "error",
-      message: "We could not save your order. Please try again.",
+      message:
+        "Your order was saved but we could not confirm it. Please contact support before trying again.",
     };
   }
 
@@ -200,11 +261,31 @@ export async function placeOrder(
   );
 
   if (itemsError) {
-    console.error("[threads-ng] order_items insert failed:", itemsError.message);
+    console.error(
+      `[threads-ng] order_items insert failed: code=${itemsError.code} message=${itemsError.message} details=${itemsError.details ?? "-"} hint=${itemsError.hint ?? "-"}`,
+    );
+
+    // Roll the order back so a failed checkout never leaves an order with no
+    // items behind. The delete is scoped to this user's own row.
+    const { error: rollbackError } = await supabase
+      .from("orders")
+      .delete()
+      .eq("id", order.id)
+      .eq("user_id", user.id);
+
+    if (rollbackError) {
+      console.error(
+        `[threads-ng] rollback of order ${order.id} failed: ${rollbackError.message}`,
+      );
+    } else {
+      console.error(`[threads-ng] rolled back orphaned order ${order.id}`);
+    }
+
     return {
       status: "error",
-      message:
-        "We could not save the items on your order. Please contact support with your order reference.",
+      message: rollbackError
+        ? "We could not save the items on your order. Please contact support with your order reference."
+        : "We could not save the items on your order, so the order was cancelled. Nothing was charged. Please try again.",
     };
   }
 

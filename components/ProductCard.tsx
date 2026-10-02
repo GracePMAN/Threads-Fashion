@@ -3,6 +3,7 @@ import type { ProductWithRating } from "@/lib/types";
 import { formatNaira } from "@/lib/money";
 import { ProductImage } from "@/components/ProductImage";
 import { Stars } from "@/components/Stars";
+import { AddToCartButton } from "@/components/AddToCartButton";
 
 interface ProductCardProps {
   product: ProductWithRating;
@@ -12,7 +13,7 @@ interface ProductCardProps {
 /** Product tile used on the homepage and the shop grid. */
 export function ProductCard({ product, priority = false }: ProductCardProps) {
   return (
-    <article className="group relative">
+    <article className="group relative flex flex-col">
       <Link
         href={`/product/${product.id}`}
         className="block focus-visible:outline-2 focus-visible:outline-accent-400"
@@ -46,6 +47,14 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
           <Stars value={product.rating.average} count={product.rating.count} size="sm" />
         </div>
       </Link>
+
+      {/*
+        Quick add sits outside the link: a button cannot be nested inside an
+        anchor, and this keeps the whole card clickable as before.
+      */}
+      <div className="mt-3">
+        <AddToCartButton product={product} />
+      </div>
     </article>
   );
 }
