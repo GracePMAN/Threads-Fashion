@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 620" width="1200" height="620" role="img" aria-label="THREADS NG — Everyday style. Made for you.">
+  <title>THREADS NG — Everyday style. Made for you.</title>
+  <!--
+    DARK-SURFACE VARIANT of the approved THREADS NG lockup.
+
+    Identical layout and geometry to threads-ng-logo.svg. The monogram and the
+    "THREADS" wordmark are rendered in bone white instead of near-black so the
+    lockup stays legible on the ink-black background. The lime accent and the
+    tagline are lightened for contrast on dark.
+  -->
+  <defs>
+    <linearGradient id="lockBoneDark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#e4dfd6"/>
+    </linearGradient>
+    <linearGradient id="lockLimeDark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#d4f763"/>
+      <stop offset="0.5" stop-color="#b4e63c"/>
+      <stop offset="1" stop-color="#8cbf1e"/>
+    </linearGradient>
+  </defs>
+
+  <!-- ================= TN monogram ================= -->
+  <g transform="translate(320 40) scale(0.9)">
+    <path d="M 196 62 L 254 62 L 254 230 L 196 230 Z" fill="url(#lockBoneDark)"/>
+    <path d="M 232 62 L 336 62 L 578 230 L 474 230 Z" fill="url(#lockLimeDark)"/>
+    <path d="M 492 230 L 492 106 C 492 64 520 44 576 32 L 576 230 Z" fill="url(#lockLimeDark)"/>
+    <path d="M 40 62 L 58 26 L 470 26 L 470 62 L 178 62 L 178 224 L 110 224 L 110 62 Z"
+          fill="url(#lockBoneDark)"/>
+  </g>
+
+  <!-- ================= THREADS NG wordmark ================= -->
+  <!--
+    NOTE: this wordmark is live <text>. Fonts declared inside an SVG loaded via
+    <img> are NOT available, so this renders in the generic sans fallback.
+    It is therefore used only as a decorative/meta asset. All in-app wordmark
+    placements render the type in real HTML so the brand font actually applies
+    and the text is selectable and translatable.
+  -->
+  <text x="600" y="452"
+        text-anchor="middle"
+        font-family="'Archivo Black','Arial Black',Impact,Haettenschweiler,sans-serif"
+        font-weight="900"
+        font-size="132"
+        letter-spacing="4">
+    <tspan fill="#faf9f7">THREADS</tspan><tspan fill="#b4e63c">NG</tspan>
+  </text>
+
+  <!-- ================= Tagline ================= -->
+  <text x="600" y="524"
+        text-anchor="middle"
+        font-family="'Helvetica Neue',Helvetica,Arial,sans-serif"
+        font-weight="500"
+        font-size="40"
+        letter-spacing="11"
+        fill="#a8a5a1">Everyday style. Made for you.</text>
+</svg>

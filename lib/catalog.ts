@@ -1,9 +1,17 @@
 /**
  * Category constants + product image resolution.
  *
- * Product images live in the public Supabase Storage bucket "product-images".
- * A product's `image` column may hold either a storage object path
- * ("classic-black-tee.png") or a fully-qualified URL. Both are supported.
+ * A product's `image` column may hold any of three shapes, all resolved by
+ * `productImageUrl` below:
+ *
+ *   - a fully-qualified URL ("https://…"),
+ *   - a root-relative path to a static asset in `public/` (the 30 catalogue
+ *     photos in `public/products/` use this form), or
+ *   - a bare object path inside the public Supabase Storage bucket
+ *     "product-images" ("classic-black-tee.png").
+ *
+ * The Storage bucket remains supported so any future upload still works without
+ * a code change.
  */
 
 import type { Product } from "@/lib/types";
@@ -51,6 +59,18 @@ export function categoryTheme(category: string | null | undefined) {
  * Turns a product's `image` value into a browser-usable URL.
  * Returns null when the product has no image on record, so callers can render
  * the branded fallback instead of a broken <img>.
+ *
+ * Three value shapes are supported, checked in this order:
+ *
+ *   1. Absolute URL (`https://…`)        -> returned unchanged.
+ *   2. Inline data URI (`data:…`)        -> returned unchanged.
+ *   3. Root-relative public path (`/…`)  -> returned unchanged.
+ *      The 30 catalogue photos ship as static assets in `public/products/`, so a
+ *      value like `/products/01-essential-black-tee.webp` is served by Next.js
+ *      from the filesystem. Without this branch such a value would fall through
+ *      to the Storage builder below and 404 against the Supabase bucket.
+ *   4. Anything else                      -> treated as a bare object path inside
+ *      the "product-images" Storage bucket and expanded against the Supabase URL.
  */
 export function productImageUrl(image: string | null | undefined): string | null {
   if (!image) return null;
@@ -58,6 +78,9 @@ export function productImageUrl(image: string | null | undefined): string | null
   if (!value) return null;
   if (/^https?:\/\//i.test(value)) return value;
   if (value.startsWith("data:")) return value;
+
+  // Static asset served from `public/` — already a usable, browser-ready URL.
+  if (value.startsWith("/")) return value;
 
   const base = process.env.NEXT_PUBLIC_SUPABASE_URL;
   if (!base) return null;

@@ -4,6 +4,7 @@ import { ProductGrid } from "@/components/ProductCard";
 import { ProductImage } from "@/components/ProductImage";
 import { categoryTheme, CATEGORY_BLURBS } from "@/lib/catalog";
 import { formatNairaCompact } from "@/lib/money";
+import { StatsMarquee } from "@/components/home/StatsMarquee";
 
 export const metadata = {
   title: "THREADS NG â€” Contemporary Nigerian Fashion",
@@ -68,22 +69,11 @@ export default async function HomePage() {
               </Link>
             </div>
 
-            <dl className="mt-12 grid max-w-md grid-cols-3 gap-6 border-t border-ink-800 pt-7">
-              {[
-                { label: "Styles", value: String(allProducts.length) },
-                { label: "Categories", value: String(categories.length) },
-                { label: "Catalogue", value: formatNairaCompact(totalValue) },
-              ].map((stat) => (
-                <div key={stat.label}>
-                  <dt className="text-[0.65rem] uppercase tracking-[0.18em] text-ink-500">
-                    {stat.label}
-                  </dt>
-                  <dd className="mt-1 font-mono text-lg font-bold text-bone-50">
-                    {stat.value}
-                  </dd>
-                </div>
-              ))}
-            </dl>
+            <p className="mt-6 max-w-md text-base leading-relaxed text-ink-300">
+              Heavyweight cotton, considered fits and pieces that survive the
+              Lagos sun. {allProducts.length} styles, priced in Naira, delivered
+              nationwide.
+            </p>
           </div>
 
           {/* Hero collage: one wide frame plus two squares. */}
@@ -127,6 +117,20 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ================================================================ *
+       * Stats marquee
+       *
+       * The three catalogue stats as a continuous horizontal slate. Values are
+       * computed from the same live data as before, so nothing is hard-coded.
+       * ================================================================ */}
+      <StatsMarquee
+        stats={[
+          { value: String(allProducts.length), label: "Styles" },
+          { value: String(categories.length), label: "Categories" },
+          { value: formatNairaCompact(totalValue), label: "Catalogue" },
+        ]}
+      />
 
       {/* ================================================================ *
        * Categories

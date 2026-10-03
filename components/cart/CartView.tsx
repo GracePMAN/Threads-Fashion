@@ -85,6 +85,8 @@ export function CartView() {
                       <button
                         type="button"
                         aria-label={`Decrease quantity of ${item.name}`}
+                        /* Held-down and repeated; a bounce per press is noise. */
+                        data-no-kick
                         onClick={() =>
                           setQuantity(item.productId, item.size, item.quantity - 1)
                         }
@@ -99,6 +101,7 @@ export function CartView() {
                       <button
                         type="button"
                         aria-label={`Increase quantity of ${item.name}`}
+                        data-no-kick
                         onClick={() =>
                           setQuantity(item.productId, item.size, item.quantity + 1)
                         }

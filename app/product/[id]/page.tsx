@@ -112,6 +112,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
               category={product.category}
               priority
               sizes="(max-width: 1024px) 100vw, 50vw"
+              /* Portrait source art in a 4:5 frame: `contain` keeps the whole
+                 garment visible instead of cropping its top and bottom. */
+              fit="contain"
             />
           </div>
         </div>

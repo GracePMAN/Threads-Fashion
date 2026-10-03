@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { signInWithGoogle } from "@/app/(auth)/actions";
-import { Logo } from "@/components/SiteHeader";
-import { GoogleIcon } from "@/components/GoogleIcon";
+import { ThreadsLogo } from "@/components/brand/ThreadsLogo";
+import { GoogleSignInButton } from "@/components/AuthSignInButton";
 
 interface LoginPageProps {
   searchParams: Promise<{ redirectTo?: string; error?: string }>;
@@ -34,7 +34,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       <div className="w-full max-w-md">
         <div className="rounded-2xl border border-ink-800 bg-ink-900/60 p-8 text-center sm:p-10">
           <div className="flex justify-center">
-            <Logo className="text-2xl text-bone-50" />
+            <ThreadsLogo variant="lockup" height={84} priority onDark className="w-full max-w-xs" />
           </div>
 
           <h1 className="mt-6 text-2xl font-bold tracking-tight text-bone-50">
@@ -56,13 +56,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
           <form action={signInWithGoogle} className="mt-7">
             <input type="hidden" name="redirectTo" value={redirectTo ?? "/orders"} />
-            <button
-              type="submit"
-              className="flex h-12 w-full items-center justify-center gap-3 rounded-full bg-bone-50 px-6 text-sm font-semibold text-ink-950 transition-colors hover:bg-accent-400"
-            >
-              <GoogleIcon className="size-5" />
-              Continue with Google
-            </button>
+            <GoogleSignInButton />
           </form>
 
           <ul className="mt-8 space-y-2 border-t border-ink-800 pt-6 text-left">

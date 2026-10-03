@@ -24,6 +24,11 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
             name={product.name}
             category={product.category}
             priority={priority}
+            /* The source art is portrait (~0.58) and this frame is 3:4, so
+               `cover` cut the top and bottom off every garment. `contain`
+               keeps the whole product inside the frame. The frame's own
+               `overflow-hidden` guarantees it cannot escape into a neighbour. */
+            fit="contain"
             className="transition-transform duration-500 group-hover:scale-105"
           />
 

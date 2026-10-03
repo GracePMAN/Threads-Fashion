@@ -8,20 +8,38 @@ interface ProductImageProps {
   sizes?: string;
   priority?: boolean;
   className?: string;
+  /**
+   * How the photo fills its frame.
+   *
+   * - `"cover"` (default, unchanged behaviour) fills the frame and crops the
+   *   overflow. Right for small square thumbnails and the wide hero collage,
+   *   where a letterboxed product would look wrong.
+   *
+   * - `"contain"` shows the WHOLE product inside the frame with no crop. Used
+   *   for the product card grid and the product detail hero, where the source
+   *   art is roughly 0.58 (portrait) and the frames are wider (0.75–0.8), so
+   *   `cover` was cutting ~20% off the top and bottom of every garment.
+   */
+  fit?: "cover" | "contain";
 }
 
 /**
- * Renders a product photo from the public "product-images" Supabase Storage
- * bucket, falling back to a branded, category-tinted panel when the product has
- * no image on record. Uploads to the bucket will appear here automatically.
+ * Renders a product photo from `public/products/` or the public "product-images"
+ * Supabase Storage bucket, falling back to a branded, category-tinted panel when
+ * the product has no image on record.
+ *
+ * Every frame that hosts this component supplies `overflow-hidden`, and the
+ * image is absolutely positioned to fill it, so an image can never visually
+ * escape its own card.
  */
 export function ProductImage({
   image,
   name,
   category,
-  sizes = "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw",
+  sizes = "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw",
   priority = false,
   className = "",
+  fit = "cover",
 }: ProductImageProps) {
   const src = productImageUrl(image);
   const alt = name ? `${name} by THREADS NG` : "THREADS NG product";
@@ -35,7 +53,7 @@ export function ProductImage({
         fill
         sizes={sizes}
         priority={priority}
-        className={`object-cover ${className}`}
+        className={`${fit === "contain" ? "object-contain" : "object-cover"} ${className}`}
       />
     );
   }

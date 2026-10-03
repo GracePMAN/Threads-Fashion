@@ -1,17 +1,7 @@
 import Link from "next/link";
 import { AuthNavSlot } from "@/components/AuthNavSlot";
 import { CartBadge } from "@/components/CartBadge";
-
-/** Inline wordmark. Reused in the header, footer and mobile menu. */
-export function Logo({ className = "" }: { className?: string }) {
-  return (
-    <span
-      className={`font-mono text-base font-bold uppercase tracking-[0.28em] ${className}`}
-    >
-      Threads<span className="text-accent-400">NG</span>
-    </span>
-  );
-}
+import { ThreadsLogo } from "@/components/brand/ThreadsLogo";
 
 const NAV_LINKS = [
   { href: "/shop", label: "Shop" },
@@ -39,7 +29,7 @@ export function SiteHeader() {
         <div className="shell">
           <div className="flex h-16 items-center justify-between gap-4">
             <Link href="/" aria-label="THREADS NG home" className="shrink-0">
-              <Logo className="text-bone-50" />
+              <ThreadsLogo variant="compact" height={30} priority onDark />
             </Link>
 
             <nav aria-label="Primary" className="hidden items-center gap-7 md:flex">

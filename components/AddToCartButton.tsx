@@ -1,12 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useCart } from "@/components/cart/CartProvider";
+import Link from "next/link";
+import { beginActionLoading, endActionLoading } from "@/components/ui/ActionLoading";
 import type { Product } from "@/lib/types";
 import { toNumber } from "@/lib/money";
 
 const DEFAULT_SIZE = "One Size";
+
+/** How long the small loading card stays up after a quick add. */
+const ADD_CARD_MS = 900;
 
 interface AddToCartButtonProps {
   product: Product;
@@ -48,6 +52,12 @@ export function AddToCartButton({ product }: AddToCartButtonProps) {
   const size = sizes[0] ?? DEFAULT_SIZE;
 
   function handleAdd() {
+    // The small in-app THREADS NG loading card. The cart write itself is
+    // synchronous, but the UI still needs a beat to show the item landing in the
+    // cart, so the card is held for a short, bounded window rather than being
+    // switched on and off within a single frame (which would never be seen).
+    const token = beginActionLoading("Adding to cart...");
+
     addItem({
       productId: product.id,
       name: product.name,
@@ -57,8 +67,10 @@ export function AddToCartButton({ product }: AddToCartButtonProps) {
       size,
       quantity: 1,
     });
+
     setAdded(true);
     window.setTimeout(() => setAdded(false), 1500);
+    window.setTimeout(() => endActionLoading(token), ADD_CARD_MS);
   }
 
   return (

@@ -106,6 +106,249 @@
   }
 }
 
+/* ==========================================================================
+ * Brand motion
+ *
+ * All of the app's decorative animation lives here as plain CSS, so it never
+ * costs a render on the server and every effect below is switched off by the
+ * `prefers-reduced-motion` block at the end of this file.
+ * ========================================================================== */
+
+/* --------------------------------------------------------------------------
+ * Stats marquee
+ *
+ * The track holds N identical copies of the stat row and travels exactly one
+ * copy's width. `100%` in a transform resolves against the element's own width
+ * (the whole track, i.e. `copies * copyWidth`), so:
+ *
+ *     -100% / copies  ==  -(copies * copyWidth) / copies  ==  -copyWidth
+ *
+ * One full copy. At that offset copy N+1 occupies precisely the pixels copy N
+ * occupied a moment ago, because they are identical markup of identical width.
+ * That is what makes the loop seamless — not merely the presence of
+ * `translateX(-50%)`, which is only correct when the track is exactly two
+ * copies wide and therefore fails on viewports wider than the content.
+ *
+ * N is generous (see `COPIES` in StatsMarquee) so the track is always wider
+ * than the viewport. Content therefore never runs out, and there is no gap and
+ * no jump at the seam.
+ *
+ * `linear` timing matters: any easing would make the motion visibly accelerate
+ * and decelerate at the wrap point instead of running at a constant velocity.
+ * -------------------------------------------------------------------------- */
+@keyframes threads-marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(calc(-100% / var(--marquee-copies, 2)), 0, 0);
+  }
+}
+
+/* The track. `will-change` promotes it to its own compositor layer so the
+   animation never triggers layout or paint on the main thread.
+
+   Gated on `no-preference` so a reduced-motion visitor never even starts the
+   animation, rather than having it started and immediately cancelled. */
+@media (prefers-reduced-motion: no-preference) {
+  .threads-marquee-track {
+    animation-name: threads-marquee;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    will-change: transform;
+    backface-visibility: hidden;
+  }
+}
+
+/* Uniform rhythm between items, and the identical trailing spacer that gives
+   every copy the same measured width. */
+.threads-marquee-copy {
+  gap: 2.25rem;
+}
+
+.threads-marquee-gap {
+  display: block;
+  width: 2.25rem;
+  flex: 0 0 auto;
+}
+
+@media (min-width: 768px) {
+  .threads-marquee-copy {
+    gap: 3.5rem;
+  }
+
+  .threads-marquee-gap {
+    width: 3.5rem;
+  }
+}
+
+/* Splash: a soft light sweep across the loading slate. */
+@keyframes threads-shimmer {
+  0% {
+    transform: translate3d(-100%, 0, 0);
+  }
+  100% {
+    transform: translate3d(600%, 0, 0);
+  }
+}
+
+/* Splash: the progress rule breathes while the app initialises. */
+@keyframes threads-progress {
+  0% {
+    transform: translate3d(-100%, 0, 0);
+  }
+  100% {
+    transform: translate3d(220%, 0, 0);
+  }
+}
+
+/* The action loading card settles into place. Short and restrained — it is a
+   card appearing, not a modal taking over. */
+@keyframes threads-card-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 0.5rem, 0) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+/* --------------------------------------------------------------------------
+ * Site-wide click "kick" — the THREADS NG shoe interaction
+ *
+ * The shoe is a real, visible graphic (see `BootGlyph` in `KickButton.tsx`),
+ * not a scale/opacity/ripple effect. On press:
+ *
+ *   1. the shoe swings down and lands on the control (`threads-boot-kick`)
+ *   2. the control compresses under it and rebounds (`threads-kick-press`)
+ *   3. both settle, total 440ms — inside the 300–500ms window
+ *
+ * HOW IT STAYS SITE-WIDE WITHOUT WRAPPING ANYTHING
+ * `KickProvider` attaches one delegated listener that adds `.threads-kick--on`
+ * to any pressed `a[href]` / `button` / `[role=button]`, and mounts the shoe
+ * into a single shared, `position: fixed` layer positioned over the pressed
+ * element via `getBoundingClientRect()`.
+ *
+ * That indirection is what makes this safe to apply everywhere:
+ *   - No markup is wrapped or inserted into the page, so elements keep their
+ *     real semantics, hrefs, handlers and Server Actions.
+ *   - The shoe lives in a fixed overlay, so it cannot affect layout, cause a
+ *     reflow, or shift anything. No wrapper `<span>` = no layout shift.
+ *   - `pointer-events: none`, and no `preventDefault` anywhere, so navigation
+ *     and submission happen immediately and normally.
+ *
+ * `data-no-kick` opts an element out (held-down steppers, carousel arrows).
+ * Inline styles beat a class rule, so a control with its own `transform` is
+ * never fought over.
+ * -------------------------------------------------------------------------- */
+
+/* The shoe drops in from above-right, lands on the control, then lifts away. */
+@keyframes threads-boot-kick {
+  0% {
+    opacity: 0;
+    transform: translate3d(0.85rem, -1.1rem, 0) rotate(-18deg) scale(0.68);
+  }
+  24% {
+    opacity: 1;
+    transform: translate3d(0, -0.18rem, 0) rotate(-4deg) scale(1);
+  }
+  40% {
+    /* Contact: sole meets the button face. */
+    opacity: 1;
+    transform: translate3d(-0.04rem, 0.2rem, 0) rotate(2deg) scale(1.05);
+  }
+  64% {
+    opacity: 1;
+    transform: translate3d(-0.04rem, 0.12rem, 0) rotate(1deg) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(-0.65rem, -0.75rem, 0) rotate(-11deg) scale(0.82);
+  }
+}
+
+@keyframes threads-kick-press {
+  0% {
+    transform: scale(1);
+  }
+  26% {
+    /* Compress under the shoe. */
+    transform: scale(0.955, 0.94);
+  }
+  55% {
+    /* Small rebound. */
+    transform: scale(1.018, 1.022);
+  }
+  78% {
+    transform: scale(0.994, 0.998);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.threads-kick--on {
+  animation: threads-kick-press 440ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* The shared shoe layer.
+ *
+ * At rest it is fully hidden (`display: none`), and it becomes visible ONLY while
+ * `.threads-kick-shoe--playing` is applied at press time. That is deliberate:
+ *
+ *   - Using `visibility: hidden` (or Tailwind's `invisible`) would leave the
+ *     element permanently hidden, because nothing in the kick handler removes it.
+ *   - Having the animation on the base class would make it fire once on mount,
+ *     finishing long before the first click.
+ *
+ * So: base rule hides, `--playing` reveals and animates, and the JS toggles only
+ * `--playing`. `pointer-events: none` means it can never intercept the very
+ * click it is decorating, and being `position: fixed` it cannot affect layout.
+ */
+.threads-kick-shoe {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 150;
+  pointer-events: none;
+  display: none;
+  transform-origin: bottom center;
+  will-change: transform, opacity;
+}
+
+/* Applied only for the duration of a kick. The keyframes end at opacity 0, and
+   the class is removed on the next press, so the shoe is never left on screen. */
+.threads-kick-shoe--playing {
+  display: block;
+  animation: threads-boot-kick 440ms cubic-bezier(0.34, 1.4, 0.5, 1) forwards;
+}
+
+/* --------------------------------------------------------------------------
+ * Order tracking timeline
+ *
+ * A gentle fill growing down the rail, so the completed stage reads as
+ * "this part is settled" rather than animating the whole timeline.
+ * -------------------------------------------------------------------------- */
+@keyframes threads-rail-fill {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+/* --------------------------------------------------------------------------
+ * Reduced motion
+ *
+ * The blanket override below neutralises every animation and transition in the
+ * app. The marquee needs an explicit follow-up: stopping the animation alone
+ * would leave the track parked at its start position, so it is additionally
+ * reset to the origin and made horizontally scrollable. That keeps the stats
+ * fully readable instead of hiding them off-screen.
+ * -------------------------------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -114,6 +357,41 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+
+  /* Marquee: park the track at its origin and let it scroll by hand. The
+     animation itself is never started (see the `no-preference` gate above),
+     so all that is left is to reset the transform and make the row scrollable
+     — otherwise the stats would be parked mid-track and partly off-screen. */
+  .threads-marquee-track {
+    animation: none !important;
+    transform: none !important;
+    will-change: auto;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .threads-marquee-track::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* No press animation. The class may briefly be present, but it has no effect,
+     so the interaction is a genuine no-op for reduced-motion visitors. */
+  .threads-kick--on {
+    animation: none !important;
+  }
+
+  /* Elements that only provide structure for an animated child never animate
+     themselves — scaling them would clip or displace the content inside. */
+  .threads-marquee-track,
+  [data-no-kick] {
+    animation: none !important;
+  }
+
+  /* Timeline rail sits fully drawn; the states carry the meaning. */
+  .threads-rail {
+    animation: none !important;
+    transform: scaleY(1) !important;
   }
 }
 

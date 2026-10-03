@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Logo } from "@/components/SiteHeader";
+import { ThreadsLogo } from "@/components/brand/ThreadsLogo";
 import { CATEGORIES } from "@/lib/catalog";
 
 const HELP_LINKS = [
@@ -15,7 +15,7 @@ export function SiteFooter() {
       <div className="shell py-14">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div className="lg:col-span-2">
-            <Logo className="text-bone-50" />
+            <ThreadsLogo variant="compact" height={34} onDark />
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-ink-400">
               Contemporary Nigerian fashion, built on heavyweight cotton,
               considered fits and everyday versatility. Designed in Lagos.

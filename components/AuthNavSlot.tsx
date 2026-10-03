@@ -19,27 +19,44 @@ export function AuthNavSlot() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // ONE browser client for this component's lifetime.
+    //
+    // This previously called `createClient()` twice — once for `getUser()` and
+    // again for `onAuthStateChange` — which built two independent Supabase
+    // clients, each with its own storage listener and auto-refresh timer. The
+    // duplicate is wasteful and can emit `setUser` after teardown.
+    const supabase = createClient();
     let active = true;
 
     async function load() {
-      const supabase = createClient();
-      const { data } = await supabase.auth.getUser();
-      if (!active) return;
-      setUser(data.user);
-      setLoading(false);
+      try {
+        const { data } = await supabase.auth.getUser();
+        if (!active) return;
+        setUser(data.user);
+      } catch {
+        // A failed session read must not leave the header stuck on the
+        // placeholder; fall through to the signed-out state.
+        if (!active) return;
+        setUser(null);
+      } finally {
+        if (active) setLoading(false);
+      }
     }
 
-    load();
+    void load();
 
-    const supabase = createClient();
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      // Ignore post-unmount emissions; `active` guards the React 18+ safe update.
+      if (!active) return;
       setUser(session?.user ?? null);
       setLoading(false);
     });
 
     return () => {
       active = false;
-      sub.subscription.unsubscribe();
+      subscription.unsubscribe();
     };
   }, []);
 

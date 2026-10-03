@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 250" width="620" height="250" role="img" aria-label="THREADS NG TN monogram">
+  <title>THREADS NG — TN monogram</title>
+  <!--
+    DARK-SURFACE VARIANT of the approved TN monogram.
+
+    The mark's identity — identical path geometry to threads-ng-mark.svg — is
+    preserved exactly. Only the *fill* of the structural strokes is inverted
+    from near-black (#0a0a0a) to bone white, because the original black is
+    indistinguishable from the ink-black background it was placed on.
+
+    This is a presentation fix, not a redesign: same paths, same proportions,
+    same lime accent. Use this on any dark (ink-*) surface.
+  -->
+  <defs>
+    <linearGradient id="tnBoneDark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#e4dfd6"/>
+    </linearGradient>
+    <linearGradient id="tnLimeDark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#d4f763"/>
+      <stop offset="0.5" stop-color="#b4e63c"/>
+      <stop offset="1" stop-color="#8cbf1e"/>
+    </linearGradient>
+  </defs>
+
+  <g id="tnMark">
+    <!-- Left stem of the N, in bone white. -->
+    <path d="M 196 62 L 254 62 L 254 230 L 196 230 Z" fill="url(#tnBoneDark)"/>
+    <!-- Lime diagonal, unchanged. -->
+    <path d="M 232 62 L 336 62 L 578 230 L 474 230 Z" fill="url(#tnLimeDark)"/>
+    <!-- Lime curved shoulder, unchanged. -->
+    <path d="M 492 230 L 492 106 C 492 64 520 44 576 32 L 576 230 Z" fill="url(#tnLimeDark)"/>
+    <!-- T crossbar + stem, in bone white. -->
+    <path d="M 40 62 L 58 26 L 470 26 L 470 62 L 178 62 L 178 224 L 110 224 L 110 62 Z"
+          fill="url(#tnBoneDark)"/>
+  </g>
+</svg>

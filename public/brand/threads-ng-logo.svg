@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 620" width="1200" height="620" role="img" aria-label="THREADS NG — Everyday style. Made for you.">
+  <title>THREADS NG — Everyday style. Made for you.</title>
+  <defs>
+    <linearGradient id="lockupLime" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#d4f763"/>
+      <stop offset="0.5" stop-color="#b4e63c"/>
+      <stop offset="1" stop-color="#8cbf1e"/>
+    </linearGradient>
+    <linearGradient id="lockupSheen" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- ================= TN monogram ================= -->
+  <g transform="translate(320 40) scale(0.9)">
+    <path d="M 196 62 L 254 62 L 254 230 L 196 230 Z" fill="#0a0a0a"/>
+    <path d="M 232 62 L 336 62 L 578 230 L 474 230 Z" fill="url(#lockupLime)"/>
+    <path d="M 492 230 L 492 106 C 492 64 520 44 576 32 L 576 230 Z" fill="url(#lockupLime)"/>
+    <path d="M 40 62 L 58 26 L 470 26 L 470 62 L 178 62 L 178 224 L 110 224 L 110 62 Z"
+          fill="#0a0a0a" stroke="#b4e63c" stroke-width="3" stroke-linejoin="miter"/>
+  </g>
+
+  <!-- ================= THREADS NG wordmark ================= -->
+  <text x="600" y="452"
+        text-anchor="middle"
+        font-family="'Archivo Black','Helvetica Neue',Helvetica,Arial,sans-serif"
+        font-weight="900"
+        font-size="132"
+        letter-spacing="4">
+    <tspan fill="#0a0a0a">THREADS</tspan><tspan fill="#a9dd2f">NG</tspan>
+  </text>
+
+  <!-- ================= Tagline ================= -->
+  <text x="600" y="524"
+        text-anchor="middle"
+        font-family="'Helvetica Neue',Helvetica,Arial,sans-serif"
+        font-weight="500"
+        font-size="40"
+        letter-spacing="11"
+        fill="#8f8f8f">Everyday style. Made for you.</text>
+
+  <rect x="0" y="0" width="1200" height="620" fill="url(#lockupSheen)" pointer-events="none"/>
+</svg>

@@ -137,14 +137,24 @@ export default async function OrdersPage() {
                     {itemCount} {itemCount === 1 ? "item" : "items"} &middot; Payment on
                     delivery
                   </p>
-                  {order.order_items[0] && (
+
+                  {/* Uses this order's real id. No hard-coded reference. */}
+                  <div className="flex flex-wrap items-center gap-4">
                     <Link
-                      href={`/product/${order.order_items[0].product_id}`}
-                      className="text-xs font-semibold uppercase tracking-[0.14em] text-accent-400 hover:underline"
+                      href={`/orders/${order.id}/tracking`}
+                      className="inline-flex h-9 items-center rounded-full border border-ink-700 px-4 text-xs font-semibold text-bone-100 transition-colors hover:border-accent-400 hover:text-accent-400"
                     >
-                      Buy again &rarr;
+                      Track order
                     </Link>
-                  )}
+                    {order.order_items[0] && (
+                      <Link
+                        href={`/product/${order.order_items[0].product_id}`}
+                        className="text-xs font-semibold uppercase tracking-[0.14em] text-accent-400 hover:underline"
+                      >
+                        Buy again &rarr;
+                      </Link>
+                    )}
+                  </div>
                 </div>
               </li>
             );

@@ -1,11 +1,13 @@
-"use client";
+﻿"use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useState, useTransition } from "react";
 import { useCart } from "@/components/cart/CartProvider";
 import { ProductImage } from "@/components/ProductImage";
 import { placeOrder, type PlaceOrderState } from "@/app/checkout/actions";
+import { OrderConfirmation } from "@/components/order/OrderConfirmation";
+import { beginActionLoading, endActionLoading } from "@/components/ui/ActionLoading";
 import { formatNaira } from "@/lib/money";
 
 interface CheckoutFormProps {
@@ -45,17 +47,26 @@ export function CheckoutForm({ customerName, customerEmail }: CheckoutFormProps)
     }));
 
     startTransition(async () => {
-      const result = await placeOrder(lines, form);
+      // The small in-app THREADS NG loading card, shown only while the order is
+      // genuinely being processed. The submit button, its `disabled` state and
+      // the Server Action itself are all left exactly as they were.
+      const token = beginActionLoading("Processing order...");
 
-      if (result.status === "success") {
-        // Empty the basket only once the order is safely persisted.
-        clearCart();
+      try {
+        const result = await placeOrder(lines, form);
+
+        if (result.status === "success") {
+          // Empty the basket only once the order is safely persisted.
+          clearCart();
+          setState(result);
+          router.refresh();
+          return;
+        }
+
         setState(result);
-        router.refresh();
-        return;
+      } finally {
+        endActionLoading(token);
       }
-
-      setState(result);
     });
   }
 
@@ -88,52 +99,15 @@ export function CheckoutForm({ customerName, customerEmail }: CheckoutFormProps)
   // ------------------------------------------------------------ *
   // Success state
   // ------------------------------------------------------------ */
-  if (state.status === "success") {
+  if (state.status === "success" && state.orderId) {
     return (
-      <div className="mx-auto max-w-lg rounded-2xl border border-accent-400/30 bg-accent-400/[0.04] p-8 text-center sm:p-10">
-        <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-accent-400">
-          <svg
-            className="size-7 text-ink-950"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden
-          >
-            <path d="m5 13 4 4L19 7" />
-          </svg>
-        </div>
-
-        <h2 className="mt-6 text-2xl font-bold text-bone-50">Order placed</h2>
-        <p className="mt-2 text-sm leading-relaxed text-ink-300">
-          Thank you{form.fullName ? `, ${form.fullName.split(" ")[0]}` : ""}. Your
-          order is saved to your account.
-        </p>
-
-        {state.emailSent === false && (
-          <p className="mt-4 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-xs text-amber-300">
-            We could not send the confirmation email just now. Your order is
-            saved and you can view it in your order history.
-          </p>
-        )}
-
-        <div className="mt-7 flex flex-wrap justify-center gap-3">
-          <Link
-            href="/orders"
-            className="inline-flex h-11 items-center rounded-full bg-accent-400 px-6 text-sm font-bold text-ink-950 transition-colors hover:bg-accent-300"
-          >
-            View my orders
-          </Link>
-          <Link
-            href="/shop"
-            className="inline-flex h-11 items-center rounded-full border border-ink-700 px-6 text-sm font-semibold text-bone-100 transition-colors hover:border-ink-500"
-          >
-            Continue shopping
-          </Link>
-        </div>
-      </div>
+      <OrderConfirmation
+        orderId={state.orderId}
+        total={subtotal}
+        createdAt={state.createdAt}
+        emailSent={state.emailSent}
+        firstName={form.fullName ? form.fullName.split(" ")[0] : undefined}
+      />
     );
   }
 
@@ -225,8 +199,10 @@ export function CheckoutForm({ customerName, customerEmail }: CheckoutFormProps)
           </div>
         </dl>
 
-        <button type="submit" disabled={pending}
-          className="mt-6 h-12 w-full rounded-full bg-accent-400 text-sm font-bold text-ink-950 transition-colors hover:bg-accent-300 disabled:cursor-not-allowed disabled:opacity-60">
+        <button
+          type="submit"
+          disabled={pending}
+          className="mt-6 h-12 w-full items-center justify-center rounded-full bg-accent-400 text-sm font-bold text-ink-950 transition-colors hover:bg-accent-300 disabled:cursor-not-allowed disabled:opacity-60">
           {pending ? "Placing order..." : "Place order"}
         </button>
 

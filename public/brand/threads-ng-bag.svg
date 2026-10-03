@@ -1,0 +1,126 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="1000" height="1000" role="img" aria-label="THREADS NG shopping bag">
+  <title>THREADS NG shopping bag</title>
+  <defs>
+    <!-- lime rope / gusset gradient -->
+    <linearGradient id="bagLime" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#d4f763"/>
+      <stop offset="0.45" stop-color="#b4e63c"/>
+      <stop offset="1" stop-color="#83b81a"/>
+    </linearGradient>
+    <linearGradient id="ropeLime" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#d9fb7a"/>
+      <stop offset="0.5" stop-color="#b4e63c"/>
+      <stop offset="1" stop-color="#8cbf1e"/>
+    </linearGradient>
+    <!-- black paperboard front face -->
+    <linearGradient id="bagBlack" x1="0.1" y1="0" x2="0.9" y2="1">
+      <stop offset="0" stop-color="#232323"/>
+      <stop offset="0.45" stop-color="#121212"/>
+      <stop offset="1" stop-color="#050505"/>
+    </linearGradient>
+    <!-- soft top-left sheen on the paperboard -->
+    <linearGradient id="bagSheen" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.13"/>
+      <stop offset="0.6" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="floorGlow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#b4e63c" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#b4e63c" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="wallGlow" cx="0.5" cy="0.52" r="0.55">
+      <stop offset="0" stop-color="#8fbf1e" stop-opacity="0.30"/>
+      <stop offset="1" stop-color="#8fbf1e" stop-opacity="0"/>
+    </radialGradient>
+    <!-- paperboard tooth -->
+    <filter id="bagGrain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" seed="7" result="n"/>
+      <feColorMatrix in="n" type="saturate" values="0" result="g"/>
+      <feComponentTransfer in="g" result="grain">
+        <feFuncA type="linear" slope="0.14"/>
+      </feComponentTransfer>
+      <feComposite in="grain" in2="SourceGraphic" operator="in" result="masked"/>
+      <feMerge>
+        <feMergeNode in="SourceGraphic"/>
+        <feMergeNode in="masked"/>
+      </feMerge>
+    </filter>
+
+    <!-- the TN monogram, reused for the bag print -->
+    <linearGradient id="printLime" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#d4f763"/>
+      <stop offset="0.5" stop-color="#b4e63c"/>
+      <stop offset="1" stop-color="#8cbf1e"/>
+    </linearGradient>
+    <g id="bagTn">
+      <path d="M 196 62 L 254 62 L 254 230 L 196 230 Z" fill="#0a0a0a"/>
+      <path d="M 232 62 L 336 62 L 578 230 L 474 230 Z" fill="url(#printLime)"/>
+      <path d="M 492 230 L 492 106 C 492 64 520 44 576 32 L 576 230 Z" fill="url(#printLime)"/>
+      <path d="M 40 62 L 58 26 L 470 26 L 470 62 L 178 62 L 178 224 L 110 224 L 110 62 Z"
+            fill="#0a0a0a" stroke="#b4e63c" stroke-width="2.5" stroke-linejoin="miter"/>
+    </g>
+  </defs>
+
+  <!-- backdrop + floor -->
+  <rect width="1000" height="1000" fill="#080808"/>
+  <rect width="1000" height="1000" fill="url(#wallGlow)"/>
+  <ellipse cx="500" cy="930" rx="420" ry="70" fill="url(#floorGlow)"/>
+
+  <!-- ================= handles (behind the bag rim) ================= -->
+  <g fill="none" stroke-linecap="round">
+    <!-- rear handle -->
+    <path d="M 330 372 C 352 176 434 138 498 138 C 562 138 644 176 666 372"
+          stroke="#6f9c15" stroke-width="26" opacity="0.85"/>
+    <!-- front handle -->
+    <path d="M 300 350 C 322 152 424 108 500 108 C 576 108 678 152 700 350"
+          stroke="url(#ropeLime)" stroke-width="30"/>
+    <!-- rope twist -->
+    <path d="M 300 350 C 322 152 424 108 500 108 C 576 108 678 152 700 350"
+          stroke="#e7ffab" stroke-width="9" stroke-dasharray="13 15" opacity="0.55"/>
+    <!-- eyelets -->
+    <path d="M 300 350 C 322 152 424 108 500 108 C 576 108 678 152 700 350"
+          stroke="#1b1b1b" stroke-width="34" opacity="0"/>
+  </g>
+  <circle cx="303" cy="356" r="15" fill="none" stroke="#cfd6c4" stroke-width="5"/>
+  <circle cx="697" cy="356" r="15" fill="none" stroke="#cfd6c4" stroke-width="5"/>
+
+  <!-- ================= bag body ================= -->
+  <g filter="url(#bagGrain)">
+    <!-- lime gusset (right side panel) -->
+    <path d="M 700 336 L 796 380 L 782 872 L 686 894 Z" fill="url(#bagLime)"/>
+    <!-- gusset crease highlight -->
+    <path d="M 700 336 L 796 380 L 790 442 L 698 398 Z" fill="#e2ff92" opacity="0.75"/>
+    <!-- top rim (folded) -->
+    <path d="M 250 336 L 700 336 L 796 380 L 316 372 Z" fill="#1c1c1c"/>
+    <path d="M 250 336 L 700 336 L 796 380 L 316 372 Z" fill="url(#bagSheen)"/>
+    <!-- front face -->
+    <path d="M 250 336 L 700 336 L 686 894 L 226 894 Z" fill="url(#bagBlack)"/>
+    <path d="M 250 336 L 700 336 L 686 894 L 226 894 Z" fill="url(#bagSheen)"/>
+    <!-- front face left edge light -->
+    <path d="M 250 336 L 268 338 L 246 894 L 226 894 Z" fill="#ffffff" opacity="0.07"/>
+  </g>
+
+  <!-- ================= printed artwork ================= -->
+  <g transform="translate(232 430) scale(0.62)">
+    <use href="#bagTn"/>
+  </g>
+
+  <text x="456" y="712"
+        text-anchor="middle"
+        font-family="'Archivo Black','Helvetica Neue',Helvetica,Arial,sans-serif"
+        font-weight="900"
+        font-size="66"
+        letter-spacing="2">
+    <tspan fill="#c9c9c9">THREADS</tspan><tspan fill="#b4e63c">NG</tspan>
+  </text>
+
+  <text x="456" y="762"
+        text-anchor="middle"
+        font-family="'Helvetica Neue',Helvetica,Arial,sans-serif"
+        font-weight="500"
+        font-size="23"
+        letter-spacing="5"
+        fill="#9a9a9a">Everyday style. Made for you.</text>
+
+  <!-- base contact shadow -->
+  <ellipse cx="470" cy="898" rx="290" ry="26" fill="#000000" opacity="0.5"/>
+</svg>

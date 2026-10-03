@@ -28,6 +28,8 @@ export interface PlaceOrderState {
   message: string;
   orderId?: string;
   emailSent?: boolean;
+  /** Real `created_at` of the order row, echoed back for the success card. */
+  createdAt?: string;
 }
 
 const PHONE_PATTERN = /^[0-9+\s-]{7,20}$/;
@@ -320,5 +322,6 @@ export async function placeOrder(
     message: "Your order has been placed.",
     orderId: order.id,
     emailSent: emailResult.sent,
+    createdAt: order.created_at,
   };
 }

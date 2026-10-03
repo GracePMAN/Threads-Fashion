@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useCart } from "@/components/cart/CartProvider";
+import Link from "next/link";
+import { beginActionLoading, endActionLoading } from "@/components/ui/ActionLoading";
 import { MAX_QUANTITY } from "@/lib/cart-limits";
 import type { Product } from "@/lib/types";
 import { formatNaira, toNumber } from "@/lib/money";
@@ -13,6 +15,9 @@ interface AddToCartProps {
 }
 
 const DEFAULT_SIZE = "One Size";
+
+/** How long the small loading card stays up after a quick add. */
+const ADD_CARD_MS = 900;
 
 /**
  * Size picker, quantity stepper and add-to-cart control.
@@ -32,6 +37,10 @@ export function AddToCart({ product, compact = false }: AddToCartProps) {
   const price = toNumber(product.price);
 
   function handleAdd() {
+    // Small in-app THREADS NG loading card, bounded so it always clears. The
+    // cart write and the button's own handler are otherwise untouched.
+    const token = beginActionLoading("Adding to cart...");
+
     const chosen = size || sizes[0];
     addItem({
       productId: product.id,
@@ -42,19 +51,21 @@ export function AddToCart({ product, compact = false }: AddToCartProps) {
       size: chosen,
       quantity,
     });
+
     setAdded(true);
     window.setTimeout(() => setAdded(false), 1800);
+    window.setTimeout(() => endActionLoading(token), ADD_CARD_MS);
   }
 
   if (compact) {
     // Card variant: link through to the product page to pick a size.
     return (
-      <a
+      <Link
         href={`/product/${product.id}`}
-        className="inline-flex items-center justify-center rounded-full bg-bone-50 px-4 py-2 text-xs font-semibold text-ink-950 transition-colors hover:bg-accent-400"
+        className="inline-flex h-12 items-center justify-center rounded-full bg-accent-400 px-8 text-sm font-bold text-ink-950 transition-colors hover:bg-accent-300"
       >
-        View details
-      </a>
+        View product
+      </Link>
     );
   }
 
@@ -97,6 +108,8 @@ export function AddToCart({ product, compact = false }: AddToCartProps) {
             <button
               type="button"
               aria-label="Decrease quantity"
+              /* Steppers are held down and repeat; a bounce per press is noise. */
+              data-no-kick
               onClick={() => setQuantity((q) => Math.max(1, q - 1))}
               disabled={quantity <= 1}
               className="px-3.5 py-2 text-lg leading-none text-bone-100 transition-colors hover:text-accent-400 disabled:opacity-30"
@@ -112,6 +125,7 @@ export function AddToCart({ product, compact = false }: AddToCartProps) {
             <button
               type="button"
               aria-label="Increase quantity"
+              data-no-kick
               onClick={() => setQuantity((q) => Math.min(MAX_QUANTITY, q + 1))}
               disabled={quantity >= MAX_QUANTITY}
               className="px-3.5 py-2 text-lg leading-none text-bone-100 transition-colors hover:text-accent-400 disabled:opacity-30"
@@ -127,7 +141,7 @@ export function AddToCart({ product, compact = false }: AddToCartProps) {
           type="button"
           onClick={handleAdd}
           disabled={needsSize && !size}
-          className="h-12 w-full rounded-full bg-accent-400 px-8 text-sm font-bold text-ink-950 transition-colors hover:bg-accent-300 disabled:cursor-not-allowed disabled:bg-ink-700 disabled:text-ink-500 sm:w-auto"
+          className="h-12 w-full items-center justify-center rounded-full bg-accent-400 px-8 text-sm font-bold text-ink-950 transition-colors hover:bg-accent-300 disabled:cursor-not-allowed disabled:bg-ink-700 disabled:text-ink-500 sm:w-auto"
         >
           {added ? "Added to cart ✓" : "Add to cart"}
         </button>
